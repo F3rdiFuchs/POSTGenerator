@@ -13,6 +13,8 @@ public class HttpConnector {
     private String url;
     private String context;
     private int hops;
+    private boolean waitForResponse = true;
+    private String temp;
 
     public int getInput() throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
@@ -24,7 +26,25 @@ public class HttpConnector {
         context = br.readLine();
         System.out.println("How many posts? ");
         hops = Integer.parseInt(br.readLine());
-        return hops;
+        System.out.println("Wait for response? Y/N (default: true");
+        temp = br.readLine();
+
+        if (temp.equals("Y") || temp.equals("y"))
+        {
+            waitForResponse = true;
+            return hops;
+        }
+        else if (temp.equals("N") ||  temp.equals("n"))
+        {
+            waitForResponse = false;
+            return hops;
+        }
+        else
+        {
+            waitForResponse = true;
+            return hops;
+        }
+
     }
 
     public void sendPost() {
@@ -41,17 +61,19 @@ public class HttpConnector {
             writer.flush();
             writer.close();
 
-            int responseCode = con.getResponseCode();
             System.out.println("POST:");
 
-            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-            String input;
-            StringBuffer response = new StringBuffer();
-            while((input = in.readLine())!= null) {
-                response.append(input);
+            if (waitForResponse == true) {
+                int responseCode = con.getResponseCode();
+                BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                String input;
+                StringBuffer response = new StringBuffer();
+                while ((input = in.readLine()) != null) {
+                    response.append(input);
+                }
+                in.close();
+                System.out.println(response.toString());
             }
-            in.close();
-            System.out.println(response.toString());
         }
         catch (Exception e) {
             System.out.println(e);
